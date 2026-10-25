@@ -1,12 +1,29 @@
-# RE3 N64 Port: GitHub Actions Toolchain Pack
+# RE3 Classic Toolkit — Codex Workflow Pack
 
-Copy `.github/workflows/*.yml` and `scripts/*` into the corresponding paths in `WackyWaldo90/RE3-N64-Port`. Commit them, then use GitHub Actions > Run workflow. The pack does **not** contain or install proprietary Nintendo SDKs, ROMs, or game assets.
+This pack is a safe starter workflow for WackyWaldo90/RE3-N64-Port. Copy `AGENTS.md`, `scripts/` and `.github/workflows/` to the root of that repository.
 
-- `reverse-engineering-tools.yml`: create a Python environment and attempt installation/import checks for splat, spimdisasm, rabbitizer, n64img. Errors are logged; package naming/version changes may require adjustments.
-- `n64-build-toolchain.yml`: check Docker and fetch libdragon source, inventory project build inputs. **Does not claim to compile the game or install an N64 compiler.**
-- `media-analysis-tools.yml`: install FFmpeg, 7-Zip and binary utilities; archive version information.
-- `rom-inventory.yml`: validate a Python ROM inventory script; skip cleanly unless a private ROM is supplied to `private-input/re2.z64` on the runner. Do not commit copyrighted ROM files to public GitHub.
+## Verified Drive installer
+- Name: Resident-Evil-Classic-Toolkit-v1.1.0-CORREGIDO-Setup-x64.exe
+- Size: 213,535,958 bytes
+- SHA-256: `f903d00d0d096c1b22bf4892185491c76bf2e592fe7d1c14b785ae824fa8d52f`
+- Source: Google Drive / Tools
+- Format: Windows PE32+ x64 executable.
 
-The existing `ares-flatpak.yml` workflow remains separate. Ares GUI operation and automated gameplay require a virtual display, test inputs, verified ROM delivery and screenshots, and are **not** implemented here.
+The installer was inspected **statically only**. Its embedded contents and actual feature set have not been verified. Strings resembling Electron, NSIS, RDT, EMD and SCD occur in the binary; these do not prove supported functionality.
 
-GitHub-hosted runners are ephemeral. Forked source repositories are not installed automatically. For reproducible results, pin tool versions/commit SHAs after first successful CI run. Review workflow logs and fix dependencies rather than assuming a green check proves functional game extraction.
+## Workflow
+1. Retain installer in Drive. Avoid public redistribution.
+2. On a trusted isolated Windows analysis VM, inspect the installer and export permitted documentation and data; do not execute unknown software in GitHub Actions.
+3. Use `python scripts/toolkit_pipeline.py inventory exported-directory reports` to create a hashed inventory.
+4. Curate small textual format specs and JSON/CSV catalogues for Codex, with exact source provenance.
+5. Use `python scripts/toolkit_pipeline.py split approved-file.bin parts` only if distributing the file is authorized. Each part is 24,000,000 bytes (below 25,000,000 bytes); manifest records hashes.
+6. Use `python scripts/toolkit_pipeline.py restore parts rebuilt-file.bin` to reconstruct and verify it.
+7. Run the workflow in GitHub Actions to test the pipeline without requiring ROMs or the installer.
+
+## Next research deliverables
+- `reports/toolkit_modules.json`: verified module inventory (not yet generated)
+- `reports/re3_format_catalogue.json`: PS1 format evidence (not yet generated)
+- `reports/re2_n64_comparison.csv`: verified RE2 vs RE3 format/size mapping (not yet generated)
+- `reports/ram_budget.md`: measured N64 runtime allocations (not yet generated)
+
+**Important:** Splitting an installer does not reduce its total storage or make it useful to Codex as source code. The most useful output is a compact, evidence-backed reference catalogue. GitHub's actual individual file limits differ by upload method; 24 MB chunks are a conservative target, not a universal GitHub limit.
