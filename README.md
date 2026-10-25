@@ -1,45 +1,12 @@
-# RE3 N64 — Toolchain transfer kit
+# RE3 N64 Port: GitHub Actions Toolchain Pack
 
-This kit **does not contain** a compiler, libdragon SDK or emulator. It safely transfers a **user-provided, complete, licensed and verified** toolchain archive in pieces of at most 24 MiB (25,165,824 bytes), below a 25 MB decimal limit. No parts are generated until the real archive is supplied.
+Copy `.github/workflows/*.yml` and `scripts/*` into the corresponding paths in `WackyWaldo90/RE3-N64-Port`. Commit them, then use GitHub Actions > Run workflow. The pack does **not** contain or install proprietary Nintendo SDKs, ROMs, or game assets.
 
-## Preferred toolchain
+- `reverse-engineering-tools.yml`: create a Python environment and attempt installation/import checks for splat, spimdisasm, rabbitizer, n64img. Errors are logged; package naming/version changes may require adjustments.
+- `n64-build-toolchain.yml`: check Docker and fetch libdragon source, inventory project build inputs. **Does not claim to compile the game or install an N64 compiler.**
+- `media-analysis-tools.yml`: install FFmpeg, 7-Zip and binary utilities; archive version information.
+- `rom-inventory.yml`: validate a Python ROM inventory script; skip cleanly unless a private ROM is supplied to `private-input/re2.z64` on the runner. Do not commit copyrighted ROM files to public GitHub.
 
-- libdragon SDK and its documented compatible toolchain: https://github.com/DragonMinded/libdragon
-- libdragon build instructions: https://github.com/DragonMinded/libdragon/wiki
-- Ares emulator: https://github.com/ares-emulator/ares
+The existing `ares-flatpak.yml` workflow remains separate. Ares GUI operation and automated gameplay require a virtual display, test inputs, verified ROM delivery and screenshots, and are **not** implemented here.
 
-Use the upstream supported installation method, including a pinned commit/release and checksums. Avoid bundling an arbitrary `mips64-linux-gnu-gcc` as a substitute for a supported N64 bare-metal toolchain. A Docker image or native toolchain may be used depending on the Codex execution environment. An SDK checkout alone is not a compiler distribution.
-
-## Pack (on a machine with the real archive)
-
-```bash
-python3 split_toolchain.py /path/to/verified-n64-toolchain.tar.xz --output n64-toolchain-parts
-```
-
-Upload `manifest.json` and all `.partNNN` files to a **private** repository or artifact store if licensing permits. Prefer GitHub Releases or an external artifact store over committing hundreds of megabytes of binaries into Git history. Public hosting requires checking license and redistribution terms for every included component.
-
-## Reconstruct (inside Codex)
-
-```bash
-python3 reconstruct_toolchain.py n64-toolchain-parts --output /tmp/n64-toolchain.tar.xz
-sha256sum /tmp/n64-toolchain.tar.xz
-```
-
-The `--output` filename must match the actual archive format; no extraction happens automatically. After checksum verification, inspect archive members and extract using the correct format. Do not execute arbitrary scripts from an unverified archive.
-
-## Configure and verify
-
-Install the toolchain according to its release documentation; then verify:
-
-```bash
-printf 'N64_INST=%s\n' "${N64_INST:-<unset>}"
-command -v mips64-elf-gcc || true
-command -v mips64-elf-ld || true
-find "${N64_INST:-/nonexistent}" -name n64.mk -print 2>/dev/null
-```
-
-Compiler names and layout vary across libdragon toolchain releases. Follow the exact pinned release's documentation rather than assuming the above names are universal. Emulators are a separate dependency and must be installed and verified independently. No boot, ROM compilation or RAM result is claimed by this kit.
-
-## Codex prompt
-
-> Read this README. Locate the user-provided N64 SDK/toolchain parts. Verify the manifest and reconstruct the archive. Install the pinned SDK/compiler only if permitted, verify N64_INST, and compile a minimal libdragon boot-to-menu ROM. If the parts or environment permissions are missing, report the exact blocker. Never claim the compiler is installed simply because this transfer kit exists.
+GitHub-hosted runners are ephemeral. Forked source repositories are not installed automatically. For reproducible results, pin tool versions/commit SHAs after first successful CI run. Review workflow logs and fix dependencies rather than assuming a green check proves functional game extraction.
