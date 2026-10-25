@@ -1,0 +1,27 @@
+{
+  "source": "Resident Evil 2 (Europe) (En,Fr).z64",
+  "source_bytes": 67108864,
+  "source_sha256": "52093e994c89848b17c8e6f26546d66374cf47c9b471ec15da7f322b7ee17ab8",
+  "archive": "Resident_Evil_2_N64_ROM.zip",
+  "archive_bytes": 64398032,
+  "archive_sha256": "0fdb9f34a596f446d8228090305687e9db03555cf1dae346f8c76861d7bee31b",
+  "parts": [
+    {
+      "file": "Resident_Evil_2_N64_ROM.zip.part001",
+      "bytes": 24000000,
+      "sha256": "2a4d964a199a08c3968c5c8123a1f2be9a4acb400b88cdd55a44d95e8a2e0911"
+    },
+    {
+      "file": "Resident_Evil_2_N64_ROM.zip.part002",
+      "bytes": 24000000,
+      "sha256": "0af1d9dda32a0da3c78a3020217a9caed6811b11b78409ef8672e946af7c8a71"
+    },
+    {
+      "file": "Resident_Evil_2_N64_ROM.zip.part003",
+      "bytes": 16398032,
+      "sha256": "9966e9393cf474be621101cc252b3c5e1608d5100c9d12148233079c34f43118"
+    }
+  ],
+  "reconstruct_linux_mac": "cat Resident_Evil_2_N64_ROM.zip.part* > Resident_Evil_2_N64_ROM.zip",
+  "reconstruct_windows_powershell": "$out=[IO.File]::Create(\"Resident_Evil_2_N64_ROM.zip\"); try { Get-ChildItem \"Resident_Evil_2_N64_ROM.zip.part*\" | Sort-Object Name | ForEach-Object { $b=[IO.File]::ReadAllBytes($_.FullName); $out.Write($b,0,$b.Length) } } finally { $out.Dispose() }"
+}
