@@ -1,0 +1,70 @@
+name: RE3 N64 Workspace Audit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**/*.zip'
+      - '**/*.7z'
+      - '**/*.rar'
+      - '.github/workflows/re3-n64-workspace.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          lfs: true
+      - name: Install 7-Zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y p7zip-full
+      - name: Validate and inventory archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit
+          python3 - <<'PY'
+          import pathlib, subprocess, json
+          extensions={'.zip','.7z','.rar'}
+          files=sorted(p for p in pathlib.Path('.').rglob('*')
+                       if p.is_file() and p.suffix.lower() in extensions
+                       and '.git' not in p.parts and 'audit' not in p.parts)
+          report=[]
+          for p in files:
+              try:
+                  test=subprocess.run(['7z','t','-y',str(p)],capture_output=True,text=True,timeout=180)
+                  listing=subprocess.run(['7z','l','-slt',str(p)],capture_output=True,text=True,timeout=180)
+                  report.append({'file':str(p),'size_bytes':p.stat().st_size,
+                                 'valid':test.returncode==0,'listing':listing.stdout[-30000:],
+                                 'errors':test.stderr[-2000:]})
+              except subprocess.TimeoutExpired:
+                  report.append({'file':str(p),'valid':False,'errors':'Timed out'})
+          pathlib.Path('audit/report.json').write_text(json.dumps(report,indent=2))
+          summary=['# RE3 N64 archive audit','']
+          summary += [f"- {'PASS' if x['valid'] else 'FAIL'}: {x['file']}" for x in report]
+          if not report: summary.append('No supported archives found.')
+          pathlib.Path('audit/summary.md').write_text('\n'.join(summary)+'\n')
+          print('\n'.join(summary))
+          if any(not x['valid'] for x in report):
+              raise SystemExit('Archive validation failed')
+          PY
+      - name: Job summary
+        if: always()
+        run: |
+          if test -f audit/summary.md; then cat audit/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Upload audit reports only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: re3-n64-audit
+          path: audit/
+          if-no-files-found: warn
+          retention-days: 14
