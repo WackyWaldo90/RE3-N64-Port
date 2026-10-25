@@ -1,0 +1,10 @@
+room,record,shape,flags
+RDT/R104.RDT,42,5,z_descending
+RDT/R11F.RDT,42,5,z_descending
+RDT/R30F.RDT,31,0,duplicate_exact_record
+RDT/R30F.RDT,32,0,duplicate_exact_record
+RDT/R317.RDT,31,0,duplicate_exact_record
+RDT/R317.RDT,32,0,duplicate_exact_record
+RDT/R505.RDT,4,1,duplicate_exact_record
+RDT/R505.RDT,5,1,duplicate_exact_record
+RDT/R61F.RDT,42,5,z_descending

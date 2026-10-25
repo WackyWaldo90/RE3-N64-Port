@@ -1,0 +1,18 @@
+command: make test
+exit_code: 0
+
+stdout:
+make -C milestones/M120 test
+make[1]: Entering directory '/mnt/data/RE3_Codex_Workspace/milestones/M120'
+cc -std=c99 -O2 -Wall -Wextra -Werror r3sc_loader.c r3sc_manager.c test_r3sc_manager.c -o test_r3sc_manager
+./test_r3sc_manager n64_collision/R100.r3sc n64_collision/R101.r3sc
+PASS: swap, rollback, record access, clear
+python3 -m unittest discover -s . -p 'test_*.py'
+make[1]: Leaving directory '/mnt/data/RE3_Codex_Workspace/milestones/M120'
+
+stderr:
+..................
+----------------------------------------------------------------------
+Ran 18 tests in 0.100s
+
+OK
